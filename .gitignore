@@ -34,4 +34,4 @@ ehthumbs.db
 Thumbs.db
 
 # Application specific
-.xautoliker/
+.xautoliker/.DS_Store
