@@ -1,58 +1,88 @@
-# X AutoLiker
+# X Auto Liker
 
-This Go application automatically likes the latest posts from accounts you follow on X (formerly Twitter).
+An automated tool for liking posts on X (formerly Twitter) with configurable settings and session management.
 
 ## Features
 
-- Browser-based automation (visible browser mode)
-- Automatic login to X
-- Scrolls through your timeline
-- Automatically likes posts that haven't been liked yet
-- Built-in delays to avoid rate limiting
-
-## Prerequisites
-
-- Go 1.16 or higher
-- Chrome/Chromium browser installed
+- 👍 Automatically likes posts in your timeline
+- ⚙️ Highly configurable settings (delays, refresh cycles, timeouts)
+- 🔒 Secure session management
+- 📊 Real-time statistics
+- 🌐 Supports both visible and headless browser modes
+- 💾 Persistent sessions for quick reuse
 
 ## Installation
 
-1. Clone this repository
-2. Install dependencies:
 ```bash
-go mod download
+go install github.com/mirzaaghazadeh/xAutoLiker@latest
 ```
+
+This will install `xAutoLiker` to your `$GOPATH/bin` directory. Make sure your `$GOPATH/bin` is added to your `PATH`.
 
 ## Usage
 
-Run the program with your X credentials:
+### Basic Command
 
 ```bash
-go run main.go -username "your_username_or_email" -password "your_password"
+xAutoLiker -username "your_username" -password "your_password"
 ```
 
-## How it Works
+### Available Settings
 
-1. The program launches a Chrome browser
-2. Logs into X using provided credentials
-3. Navigates to your home timeline
-4. Automatically finds and likes unread posts
-5. Scrolls down to load more posts as needed
+1. Required:
+   - `-username`: Your X (Twitter) username/email
+   - `-password`: Your X (Twitter) password
 
-## Safety Features
+2. Optional with defaults:
+   - `-headless`: Run in headless mode without browser window (default: false)
+   - `-refresh`: Refresh page every N cycles (default: 5, 0 to disable)
+   - `-like-delay`: Delay between likes (default: 1s)
+   - `-scroll-delay`: Delay after scrolling (default: 2s)
+   - `-timeout`: Total session duration (default: 5m)
 
-- Visible browser mode for monitoring
-- Built-in delays between actions
-- Error handling for failed interactions
+### Example Commands
 
-## Note
+```bash
+# Run in headless mode with fast liking
+xAutoLiker -username "user" -password "pass" -headless -like-delay 500ms
 
-This is a basic implementation. Use responsibly and be aware of X's terms of service regarding automation.
+# Visible browser with longer delays
+xAutoLiker -username "user" -password "pass" -refresh 0 -like-delay 2s
 
-## Future Improvements
+# Long session in headless mode
+xAutoLiker -username "user" -password "pass" -headless -timeout 2h -like-delay 1s
+```
 
-- Headless browser mode option
-- Customizable delay between likes
-- Like limit configuration
-- Specific user targeting
-- OAuth authentication instead of password
+## Session Management
+
+Sessions are stored in `~/.xautoliker/sessions/[username]`. This allows for:
+- Faster subsequent logins
+- Persistent authentication
+- Multiple account support
+
+## Statistics
+
+The tool provides real-time statistics:
+- Total likes count
+- Session duration
+- Like rate (likes per minute)
+- Stats are shown every 10 likes and after page refreshes
+
+## Requirements
+
+- Go 1.21 or higher
+- Chrome/Chromium browser installed
+
+## Security Note
+
+- Your credentials are never stored, only browser session data is saved
+- Sessions are stored securely in your home directory
+- Run in headless mode for background operation
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details
