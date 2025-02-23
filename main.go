@@ -85,39 +85,31 @@ func autoLikePosts(ctx context.Context) error {
 
 	// Main liking loop
 	for {
-		var likeButtons []string
+		// Find and click like buttons
 		err = chromedp.Run(ctx,
-			// Find all unlike buttons (which means posts that haven't been liked yet)
+			// Wait for tweets to be visible
+			chromedp.WaitVisible(`//div[@data-testid="tweet"]`),
+			// Find and click all like buttons that haven't been clicked yet
 			chromedp.Evaluate(`
-				Array.from(document.querySelectorAll('div[data-testid="like"]')).map(el => el.id)
-			`, &likeButtons),
+				Array.from(document.querySelectorAll('div[data-testid="like"][aria-label*="Like"]')).forEach(btn => {
+					if (!btn.querySelector('div[data-testid="unlike"]')) {
+						btn.click();
+					}
+				});
+			`, nil),
+			chromedp.Sleep(2*time.Second), // Wait between likes
+		)
+		if err != nil {
+			log.Printf("Error while liking: %v", err)
+		}
+
+		// Scroll down to load more posts
+		err = chromedp.Run(ctx,
+			chromedp.Evaluate(`window.scrollBy(0, 800)`, nil),
+			chromedp.Sleep(3*time.Second), // Wait for new posts to load
 		)
 		if err != nil {
 			return err
-		}
-
-		if len(likeButtons) == 0 {
-			// Scroll down to load more posts
-			err = chromedp.Run(ctx,
-				chromedp.Evaluate(`window.scrollBy(0, 500)`, nil),
-				chromedp.Sleep(2*time.Second), // Wait for new posts to load
-			)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-
-		// Like each post
-		for _, buttonID := range likeButtons {
-			err = chromedp.Run(ctx,
-				chromedp.Click(`//div[@id="`+buttonID+`"]`),
-				chromedp.Sleep(1*time.Second), // Delay between likes to avoid rate limiting
-			)
-			if err != nil {
-				log.Printf("Failed to like a post: %v", err)
-				continue
-			}
 		}
 	}
 }
